@@ -1,0 +1,240 @@
+\documentclass[12pt, a4paper]{article}
+
+% ----------------------------------------------------------------------
+% KHAI BÁO GÓI (PACKAGES)
+% ----------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx} % Font Times New Roman
+% Căn lề tối ưu: Top/Bottom 2cm để chứa được nhiều nội dung hơn
+\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2cm]{geometry} 
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float} 
+\usepackage{multirow}
+\usepackage{caption}
+
+% ----------------------------------------------------------------------
+% CẤU HÌNH FORMAT (ĐÃ CHỈNH LẠI ĐỂ GỌN TRANG)
+% ----------------------------------------------------------------------
+
+% 1. Khoảng cách tiêu đề vừa phải
+\titlespacing*{\section}{0pt}{1.5ex plus 1ex minus .2ex}{1.0ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+
+% 2. Font tiêu đề
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{0.5em}{}
+
+% 3. Giãn dòng và đoạn văn (Chuẩn 1.15 - Tiết kiệm giấy hơn)
+\linespread{1.15} 
+\setlength{\parskip}{0.4em} % Khoảng cách giữa các đoạn vừa đủ
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+% ----------------------------------------------------------------------
+% TRANG 1: BÌA (TITLE PAGE)
+% ----------------------------------------------------------------------
+\begin{titlepage}
+    \begin{center}
+        \vspace*{0.5cm}
+        \textbf{\large TRƯỜNG ĐẠI HỌC FPT}\\[0.5cm]
+        \textbf{\large Môn học: ADY201m}\\[2cm] 
+
+        % Logo
+        \includegraphics[width=0.4\textwidth]{fpt_logo.png}\\[2cm]
+
+        \textbf{\LARGE BÁO CÁO ĐỀ TÀI}\\[1cm]
+        \textbf{\Large PHÂN TÍCH VÀ DỰ ĐOÁN BẤT ĐỘNG SẢN}\\[2.5cm]
+
+        \begin{table}[h]
+            \centering
+            \large
+            \renewcommand{\arraystretch}{1.3} 
+            \begin{tabular}{ll}
+                \textbf{Thành viên nhóm:} & \\ 
+                SE201725 & Nguyễn Gia Huy \\
+                SE203377 & Trần Cảnh Nhật Minh \\
+                SE204049 & Nguyễn Xuân Bình \\
+                SE201652 & Đặng Thái Nguyên \\
+            \end{tabular}
+        \end{table}
+
+        \vfill
+        \textbf{Tháng \the\month \ năm \the\year}
+    \end{center}
+\end{titlepage}
+
+% ----------------------------------------------------------------------
+% TRANG 2: MỤC LỤC
+% ----------------------------------------------------------------------
+\newpage
+\tableofcontents
+\newpage
+
+% ----------------------------------------------------------------------
+% NỘI DUNG CHÍNH (TRANG 3 - 5/6)
+% ----------------------------------------------------------------------
+
+\section{Giới thiệu}
+Thị trường bất động sản đóng vai trò thiết yếu đối với nền kinh tế nhưng thường chịu ảnh hưởng bởi nhiều yếu tố phức tạp (vị trí, diện tích, tiện ích), khiến việc xác định mức giá hợp lý trở thành thách thức lớn. Dự án tập trung ứng dụng phân tích dữ liệu từ tin đăng bất động sản để định lượng các yếu tố tác động đến giá bất động sản, cung cấp cơ sở khách quan giúp người mua đưa ra quyết định phù hợp nhất. Kết quả nghiên cứu kỳ vọng nâng cao tính minh bạch của thị trường và tạo tiền đề cho các ứng dụng phân tích chuyên sâu.
+
+\subsection{Mục tiêu Phân tích và Dự đoán}
+\textbf{Phân tích:} Tập trung khám phá mối quan hệ giữa giá và các thuộc tính (diện tích, vị trí, tiện ích, pháp lý). Nhóm đánh giá xu hướng phân bố giá theo khu vực và loại hình bất động sản, đồng thời nhận diện các rủi ro pháp lý tiềm ẩn từ dữ liệu tin đăng.
+
+\textbf{Dự đoán:} Xây dựng mô hình dự báo giá dựa trên thông tin đầu vào của người dùng. Kết quả cung cấp mức giá tham khảo để so sánh với giá chào bán, hỗ trợ người mua thương lượng hiệu quả hơn.
+
+\section{Thu thập dữ liệu}
+Để đảm bảo cơ sở dữ liệu phong phú và đa chiều cho mô hình phân tích, nhóm nghiên cứu đã tiến hành tổng hợp dữ liệu từ hai nguồn chính: thông tin giao dịch thị trường và dữ liệu không gian về hạ tầng đô thị.
+
+\subsection{Dữ liệu bất động sản}
+Phạm vi thu thập dữ liệu tập trung vào 4 thị trường sôi động nhất cả nước bao gồm: \textbf{Hà Nội, Đà Nẵng, TP. Hồ Chí Minh và Bình Dương}. Việc lựa chọn các khu vực này giúp đảm bảo cỡ mẫu đủ lớn và phản ánh đúng xu hướng chung của thị trường. Nhóm sử dụng các kỹ thuật thu thập dữ liệu tự động (Web Crawling) trên nền tảng \textit{batdongsan.com.vn} để trích xuất các thuộc tính quan trọng như giá bán, diện tích, kết cấu nhà và tình trạng pháp lý.
+
+\subsection{Dữ liệu địa lý và tiện ích}
+Bên cạnh thông tin tin đăng, yếu tố vị trí được định lượng thông qua dữ liệu bản đồ mở \textbf{(OpenStreetMap)}. Nhóm ứng dụng các thuật toán tính toán không gian để thống kê mật độ tiện ích thiết yếu (trường học, y tế, thương mại) trong phạm vi bán kính xác định quanh từng bất động sản, từ đó làm giàu thêm thông tin đầu vào cho mô hình dự báo.
+
+\section{Tổng quan về dữ liệu thô}
+Sau quá trình thu thập, bộ dữ liệu thô bao gồm tổng cộng \textbf{39 trường dữ liệu (columns)}. Do số lượng biến lớn, nhóm phân loại chúng thành 4 nhóm chính để thuận tiện cho việc quản lý trước khi xử lý:
+
+% Giãn dòng bảng 1.25: Đủ thoáng nhưng không chiếm quá nhiều đất
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25} 
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Nhóm dữ liệu} & \textbf{SL Biến} & \textbf{Mô tả các biến đại diện} \\ \hline
+\textbf{1. Metadata tin đăng} & 10 biến & Các thông tin quản lý tin: \textit{post\_id, url, published\_date, seller\_name...} giúp định danh và lọc tin rác. \\ \hline
+\textbf{2. Vị trí địa lý} & 9 biến & Các cấp hành chính (\textit{province, district, ward...}) và tọa độ (\textit{latitude, longitude}). \\ \hline
+\textbf{3. Đặc điểm BĐS} & 14 biến & Thông tin tài sản: \textit{price\_total, area, num\_floors, num\_bedrooms, direction, furniture, legal\_status...} \\ \hline
+\textbf{4. Tiện ích ngoại khu} & 6 biến & Số lượng tiện ích từ OSM: \textit{num\_schools\_1km, num\_hospitals\_2km, num\_markets\_1km...} \\ \hline
+\end{tabularx}
+\caption{Tổng quan cấu trúc dữ liệu thô (39 cột)}
+\label{tab:raw_data}
+\end{table}
+
+Việc thu thập số lượng lớn các trường dữ liệu ban đầu giúp nhóm có cái nhìn toàn diện, tuy nhiên không phải tất cả đều đóng góp vào bài toán dự đoán giá. Quá trình chọn lọc sẽ được trình bày ở phần tiếp theo.
+
+\section{Phương pháp xử lý dữ liệu}
+Dữ liệu thô thu thập từ môi trường trực tuyến thường chứa nhiều nhiễu, định dạng không đồng nhất và các giá trị khuyết thiếu. Để xây dựng cơ sở dữ liệu tin cậy cho mô hình dự báo, nhóm nghiên cứu đã thực hiện quy trình tiền xử lý nghiêm ngặt nhằm chuẩn hóa và làm sạch thông tin.
+
+\subsection{Làm sạch và Chuẩn hóa dữ liệu}
+Quy trình xử lý tập trung giải quyết các vấn đề về định dạng và tính nhất quán của dữ liệu đầu vào:
+\begin{itemize}
+    \item \textbf{Chuẩn hóa định dạng:} Các thuộc tính định lượng (giá, diện tích, kích thước) được trích xuất và chuyển đổi từ dạng văn bản sang định dạng số học để phục vụ tính toán.
+    \item \textbf{Đồng bộ hóa dữ liệu:} Các thông tin về địa danh hành chính (Quận/Huyện) được quy hoạch về một danh mục thống nhất, loại bỏ các biến thể tên gọi khác nhau do quá trình nhập liệu thủ công.
+    \item \textbf{Khử trùng lặp:} Loại bỏ các bản ghi tin đăng trùng lặp để đảm bảo tính duy nhất và độ chính xác của các quan sát trong tập dữ liệu.
+\end{itemize}
+
+\subsection{Xử lý dữ liệu thiếu và Chọn lọc đặc trưng}
+Từ tập dữ liệu ban đầu, nhóm tiến hành sàng lọc để tối ưu hóa đầu vào cho mô hình:
+\begin{itemize}
+    \item \textbf{Xử lý giá trị khuyết thiếu:} Chiến lược điền khuyết được áp dụng linh hoạt dựa trên đặc thù của từng loại hình bất động sản.
+    \item \textbf{Trích chọn đặc trưng:} Loại bỏ các biến không mang giá trị dự báo hoặc gây nhiễu. Kết quả cuối cùng giữ lại \textbf{17 thuộc tính đặc trưng} quan trọng nhất được trình bày trong bảng dưới đây.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2} % Giãn dòng vừa phải cho bảng dài
+
+\begin{tabularx}{\textwidth}{|p{2.5cm}|c|p{3.5cm}|c|X|}
+\hline
+\textbf{Nhóm biến} & \textbf{STT} & \textbf{Tên biến} & \textbf{Kiểu} & \textbf{Ý nghĩa sử dụng} \\ \hline
+
+% --- Nhóm 1 ---
+\multirow{2}{2.5cm}{\textbf{1. Mục tiêu \& Tham chiếu}} 
+ & 1 & \texttt{price\_total} & Float & Biến mục tiêu (Target). \\ \cline{2-5}
+ & 2 & \texttt{price\_per\_m2} & Float & Đơn giá tham chiếu. \\ \hline
+
+% --- Nhóm 2 ---
+\multirow{4}{2.5cm}{\textbf{2. Vị trí địa lý}} 
+ & 3 & \texttt{province} & Cat. & Tỉnh/Thành phố. \\ \cline{2-5}
+ & 4 & \texttt{district} & Cat. & Quận/Huyện. \\ \cline{2-5}
+ & 5 & \texttt{latitude} & Float & Vĩ độ. \\ \cline{2-5}
+ & 6 & \texttt{longitude} & Float & Kinh độ. \\ \hline
+
+% --- Nhóm 3 ---
+\multirow{8}{2.5cm}{\textbf{3. Đặc điểm Bất động sản}} 
+ & 7 & \texttt{area} & Float & Diện tích sử dụng ($m^2$). \\ \cline{2-5}
+ & 8 & \texttt{category} & Cat. & Loại hình (Chung cư...). \\ \cline{2-5}
+ & 9 & \texttt{legal\_status} & Cat. & Pháp lý (Sổ đỏ...). \\ \cline{2-5}
+ & 10 & \texttt{frontage} & Float & Độ rộng mặt tiền (m). \\ \cline{2-5}
+ & 11 & \texttt{road\_width} & Float & Độ rộng đường vào (m). \\ \cline{2-5}
+ & 12 & \texttt{num\_bedrooms} & Int & Số phòng ngủ. \\ \cline{2-5}
+ & 13 & \texttt{num\_toilets} & Int & Số phòng vệ sinh. \\ \cline{2-5}
+ & 14 & \texttt{num\_floors} & Int & Số tầng. \\ \hline
+
+% --- Nhóm 4 ---
+\multirow{3}{2.5cm}{\textbf{4. Tiện ích ngoại khu}} 
+ & 15 & \texttt{num\_schools\_1km} & Int & Mật độ trường (bk 1km). \\ \cline{2-5}
+ & 16 & \texttt{num\_hospitals\_2km} & Int & Mật độ y tế (bk 2km). \\ \cline{2-5}
+ & 17 & \texttt{num\_markets\_1km} & Int & Mật độ chợ (bk 1km). \\ \hline
+
+\end{tabularx}
+\caption{Danh sách 17 biến đặc trưng phân theo nhóm logic}
+\label{tab:final_features_grouped}
+\end{table}
+
+\section{Kế hoạch thực hiện}
+
+\subsection{Phương pháp làm việc (Mô hình OSEMN)}
+Dự án tuân thủ quy trình OSEMN: \textbf{O}btain (Thu thập) $\rightarrow$ \textbf{S}crub (Làm sạch) $\rightarrow$ \textbf{E}xplore (Khám phá) $\rightarrow$ \textbf{M}odel (Mô hình hóa) $\rightarrow$ \textbf{I}nterpret (Diễn giải).
+
+\begin{figure}[H]
+    \centering
+    % Để hình vừa phải, không quá to
+    \includegraphics[width=0.6\textwidth]{osemn} 
+    \caption{Quy trình phân tích dữ liệu OSEMN}
+    \label{fig:osemn}
+\end{figure}
+
+\subsection{Phân công nhiệm vụ chi tiết}
+Dựa trên quy trình OSEMN, nhóm chia dự án thành 5 giai đoạn chính. Mỗi giai đoạn bao gồm các đầu việc cụ thể được phân công cho các thành viên như sau:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3} % Bảng cuối giãn dòng 1.3 là đẹp
+
+\begin{tabularx}{\textwidth}{|p{2.5cm}|c|X|p{3.0cm}|}
+\hline
+\textbf{Giai đoạn} & \textbf{STT} & \textbf{Nội dung công việc} & \textbf{Thành viên} \\ \hline
+
+% --- 1 ---
+\multirow{2}{2.5cm}{\textbf{1. OBTAIN}} 
+ & 1 & Xác định mục tiêu và tiêu chí dữ liệu. & ... \\ \cline{2-4}
+ & 2 & Thu thập dữ liệu (Web Crawling, API). & ... \\ \hline
+
+% --- 2 ---
+\multirow{2}{2.5cm}{\textbf{2. SCRUB}} 
+ & 3 & Kiểm tra, xử lý nhiễu và Missing Data. & ... \\ \cline{2-4}
+ & 4 & Chuẩn hóa và gộp dataset thống nhất. & ... \\ \hline
+
+% --- 3 ---
+\multirow{2}{2.5cm}{\textbf{3. EXPLORE}} 
+ & 5 & Trực quan hóa (Biểu đồ, Heatmap). & ... \\ \cline{2-4}
+ & 6 & Phân tích xu hướng và chọn đặc trưng. & ... \\ \hline
+
+% --- 4 ---
+\multirow{3}{2.5cm}{\textbf{4. MODEL}} 
+ & 7 & Feature Engineering: Mã hóa, Chia tập. & ... \\ \cline{2-4}
+ & 8 & Huấn luyện mô hình Machine Learning. & ... \\ \cline{2-4}
+ & 9 & Tinh chỉnh tham số (Model Tuning). & ... \\ \hline
+
+% --- 5 ---
+\multirow{2}{2.5cm}{\textbf{5. iNterpret}} 
+ & 10 & Đánh giá kết quả mô hình (Metric). & ... \\ \cline{2-4}
+ & 11 & Tổng kết, kết luận và viết báo cáo. & Cả nhóm \\ \hline
+
+\end{tabularx}
+\caption{Bảng phân công nhiệm vụ theo 5 giai đoạn OSEMN}
+\label{tab:osemn_assignment_final}
+\end{table}
+
+\end{document}
