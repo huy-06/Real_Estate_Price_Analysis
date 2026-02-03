@@ -60,7 +60,7 @@
 \newpage
 
 \section{Giới thiệu}
-Thị trường bất động sản đóng vai trò thiết yếu đối với nền kinh tế nhưng thường chịu ảnh hưởng bởi nhiều yếu tố phức tạp như vị trí, diện tích, tiện ích, khiến việc xác định mức giá hợp lý trở thành thách thức lớn. Dự án tập trung ứng dụng phân tích dữ liệu từ tin đăng bất động sản để định lượng các yếu tố tác động đến giá bất động sản, cung cấp cơ sở khách quan giúp người mua đưa ra quyết định phù hợp nhất. Kết quả nghiên cứu được kỳ vọng sẽ nâng cao tính minh bạch của thị trường và tạo tiền đề cho các ứng dụng phân tích chuyên sâu.
+Thị trường bất động sản giữ vai trò trụ cột trong nền kinh tế nhưng thường chịu tác động phức tạp từ đa chiều yếu tố như vị trí, pháp lý, tiện ích..., khiến việc xác định giá trị thực trở thành thách thức lớn. Dự án này tiếp cận vấn đề bằng cách ứng dụng khoa học dữ liệu để khai thác nguồn thông tin phong phú từ các tin đăng bất động sản. Mục tiêu cốt lõi là định lượng mức độ ảnh hưởng của các thuộc tính then chốt và xây dựng mô hình dự đoán giá tin cậy. Kết quả nghiên cứu được kỳ vọng sẽ cung cấp cơ sở tham chiếu khách quan, hỗ trợ ra quyết định hiệu quả cho các bên tham gia thị trường và góp phần nâng cao tính minh bạch chung.
 
 \subsection{Mục tiêu Phân tích và Dự đoán}
 \textbf{Phân tích:} Tập trung khám phá mối quan hệ giữa giá và các thuộc tính (diện tích, vị trí, tiện ích, pháp lý). Nhóm đánh giá xu hướng phân bố giá theo khu vực và loại hình bất động sản, đồng thời nhận diện các rủi ro pháp lý tiềm ẩn từ dữ liệu tin đăng.
@@ -127,7 +127,7 @@ Từ tập dữ liệu ban đầu, nhóm tiến hành sàng lọc để tối ư
 \textbf{Nhóm biến} & \textbf{STT} & \textbf{Tên biến} & \textbf{Kiểu} & \textbf{Ý nghĩa sử dụng} \\ \hline
 
 \multirow{2}{2.5cm}{\textbf{1. Mục tiêu \& Tham chiếu}} 
- & 1 & \texttt{price\_total} & Float & Biến mục tiêu: Tổng số tiền người bán mong muốn (VND) \\ \cline{2-5}
+ & 1 & \texttt{price\_total} & Int & Biến mục tiêu: Tổng số tiền người bán mong muốn (VND) \\ \cline{2-5}
  & 2 & \texttt{price\_per\_m2} & Float & Đơn giá tham chiếu (VND/$m^2$) \\ \hline
 
 \multirow{4}{2.5cm}{\textbf{2. Vị trí địa lý}} 
@@ -181,24 +181,24 @@ Dựa trên quy trình OSEMN, nhóm chia dự án thành 5 giai đoạn chính. 
 \textbf{Giai đoạn} & \textbf{STT} & \textbf{Nội dung công việc} & \textbf{Thành viên} \\ \hline
 
 \multirow{2}{2.5cm}{\textbf{1. Obtain}} 
- & 1 & Xác định mục tiêu và tiêu chí dữ liệu. & ... \\ \cline{2-4}
- & 2 & Thu thập dữ liệu (Web Crawling, API). & ... \\ \hline
+ & 1 & Xác định mục tiêu và tiêu chí dữ liệu. & Cả nhóm \\ \cline{2-4}
+ & 2 & Thu thập dữ liệu (Web Crawling, API). & Cả nhóm \\ \hline
 
 \multirow{2}{2.5cm}{\textbf{2. Scrub}} 
- & 3 & Kiểm tra, xử lý dữ liệu nhiễu và khuyết thiếu. & ... \\ \cline{2-4}
- & 4 & Chuẩn hóa và gộp dataset thống nhất. & ... \\ \hline
+ & 3 & Kiểm tra, xử lý dữ liệu nhiễu và khuyết thiếu. & Huy, Minh \\ \cline{2-4}
+ & 4 & Chuẩn hóa và gộp dataset thống nhất. & Huy, Minh \\ \hline
 
 \multirow{2}{2.5cm}{\textbf{3. Explore}} 
- & 5 & Trực quan hóa (Biểu đồ, Heatmap). & ... \\ \cline{2-4}
- & 6 & Phân tích xu hướng và chọn đặc trưng. & ... \\ \hline
+ & 5 & Trực quan hóa (Biểu đồ, Heatmap). & Huy, Nguyên \\ \cline{2-4}
+ & 6 & Phân tích xu hướng và chọn đặc trưng. & Huy, Bình, Nguyên \\ \hline
 
 \multirow{3}{2.5cm}{\textbf{4. Model}} 
- & 7 & Kỹ thuật đặc trưng: Mã hóa, Chia tập. & ... \\ \cline{2-4}
- & 8 & Huấn luyện mô hình Machine Learning. & ... \\ \cline{2-4}
- & 9 & Tinh chỉnh tham số (Model Tuning). & ... \\ \hline
+ & 7 & Kỹ thuật đặc trưng: Mã hóa, Chia tập. & Bình \\ \cline{2-4}
+ & 8 & Huấn luyện mô hình Machine Learning. & Huy, Bình \\ \cline{2-4}
+ & 9 & Tinh chỉnh tham số (Model Tuning). & Bình \\ \hline
 
 \multirow{2}{2.5cm}{\textbf{5. iNterpret}} 
- & 10 & Đánh giá kết quả mô hình. & ... \\ \cline{2-4}
+ & 10 & Đánh giá kết quả mô hình. & Nguyên \\ \cline{2-4}
  & 11 & Tổng kết, kết luận và viết báo cáo. & Cả nhóm \\ \hline
 
 \end{tabularx}
