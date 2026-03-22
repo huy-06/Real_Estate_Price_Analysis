@@ -8,6 +8,7 @@ from streamlit_folium import st_folium
 import requests
 import re
 import plotly.express as px
+import os
 
 # ---------------------------------------------------------
 # CÁC DANH SÁCH CHUẨN CỦA MÔ HÌNH (GỘP THÀNH DICTIONARY ĐỂ DỄ QUẢN LÝ)
@@ -36,6 +37,8 @@ LOCATION_MAPPING = {
         "Quận Hà Đông", "Quận Bắc Từ Liêm", "Huyện Mỹ Đức", "Quận Hai Bà Trưng", "Huyện Sóc Sơn"
     ]
 }
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------
 # HÀM HỖ TRỢ XỬ LÝ DỮ LIỆU TỪ BẢN ĐỒ
@@ -134,7 +137,9 @@ if menu == "📊 Tổng quan thị trường":
     @st.cache_data
     def load_data(): 
         # Tải dữ liệu và tạo thêm cột giá trị theo Tỷ VNĐ để dễ xem
-        df = pd.read_csv("data/cleaned_data.csv")
+        data_path = os.path.join(CURRENT_DIR, "data", "cleaned_data.csv")
+        df = pd.read_csv(data_path)
+
         if 'price_total' in df.columns:
             df['price_billion'] = df['price_total'] / 1e9
         return df
@@ -298,7 +303,9 @@ elif menu == "🤖 Dự đoán giá":
     st.title("🤖 Ứng dụng dự đoán giá nhà bằng AI")
 
     @st.cache_resource
-    def load_pipeline(): return joblib.load("data/extra_trees_pipeline.joblib")
+    def load_pipeline():
+        model_path = os.path.join(CURRENT_DIR, "data", "extra_trees_pipeline.joblib")
+        return joblib.load(model_path)
 
     try: pipeline = load_pipeline()
     except:
