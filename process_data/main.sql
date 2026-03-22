@@ -1,0 +1,20 @@
+select
+	price_total,
+	area,
+	price_per_m2,
+	category,
+	latitude,
+	longitude,
+	district,
+	province,
+	legal_status,
+	frontage, 
+	road_width, 
+	num_bedrooms,
+	num_toilets, 
+	num_floors,
+	num_schools_1km, 
+	num_hospitals_2km,
+	num_markets_1km
+from 
+	raw_data
