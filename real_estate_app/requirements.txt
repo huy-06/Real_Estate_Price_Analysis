@@ -5,4 +5,4 @@ folium
 streamlit-folium
 requests
 plotly
-scikit-learn=1.4.2
+scikit-learn==1.4.2
