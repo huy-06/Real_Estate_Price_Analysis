@@ -216,7 +216,7 @@ if menu == "📊 Tổng quan thị trường":
             fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}) # Bỏ viền thừa của bản đồ
             
             # THÊM config={'scrollZoom': True} ĐỂ CHO PHÉP ZOOM BẰNG CON LĂN CHUỘT
-            st.plotly_chart(fig_map, use_container_width=True, config={'scrollZoom': True, 'displayModeBar': True})
+            st.plotly_chart(fig_map, width="stretch", config={'scrollZoom': True, 'displayModeBar': True})
             
             st.divider()
 
@@ -234,7 +234,7 @@ if menu == "📊 Tổng quan thị trường":
                     color_discrete_sequence=px.colors.qualitative.Pastel
                 )
                 fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                st.plotly_chart(fig_pie, use_container_width=True)
+                st.plotly_chart(fig_pie, width="stretch")
                 
             with chart_col2:
                 # Biểu đồ Histogram (Phân bố mức giá)
@@ -247,7 +247,7 @@ if menu == "📊 Tổng quan thị trường":
                     labels={'price_billion': 'Mức giá (Tỷ VNĐ)'}
                 )
                 fig_hist.update_layout(yaxis_title="Số lượng bài đăng")
-                st.plotly_chart(fig_hist, use_container_width=True)
+                st.plotly_chart(fig_hist, width="stretch")
 
             # Hàng 2: So sánh giá theo khu vực & Scatter Plot
             chart_col3, chart_col4 = st.columns(2)
@@ -277,7 +277,7 @@ if menu == "📊 Tổng quan thị trường":
                     color_continuous_scale=px.colors.sequential.Blues,
                     labels={'price_billion': 'Giá trung bình (Tỷ VNĐ)', y_axis: y_label}
                 )
-                st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar, width="stretch")
 
             with chart_col4:
                 # Biểu đồ phân tán (Scatter) - Mối quan hệ Diện tích & Giá
@@ -291,7 +291,7 @@ if menu == "📊 Tổng quan thị trường":
                     hover_data=['district'],
                     labels={'area': 'Diện tích (m2)', 'price_billion': 'Giá (Tỷ VNĐ)', 'category': 'Loại BĐS'}
                 )
-                st.plotly_chart(fig_scatter, use_container_width=True)
+                st.plotly_chart(fig_scatter, width="stretch")
 
     except Exception as e:
         st.error(f"❌ Có lỗi xảy ra khi load dữ liệu EDA: {e}")
@@ -408,7 +408,7 @@ elif menu == "🤖 Dự đoán giá":
 
     st.divider()
 
-    if st.button("🚀 BẮT ĐẦU DỰ ĐOÁN GIÁ", type="primary", use_container_width=True):
+    if st.button("🚀 BẮT ĐẦU DỰ ĐOÁN GIÁ", type="primary", width="stretch"):
         input_data = pd.DataFrame({
             'area':[area],
             'category': [category],
