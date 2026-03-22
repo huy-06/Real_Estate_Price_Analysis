@@ -126,8 +126,6 @@ bestIteration = 2999
 ✅ HOÀN THÀNH!
 ============================================================
 
-ý mình là không có phải thay thế phần thay thế cái 5.2 thành cái mục khác á bạn, mình nghĩ cái công cụ thì có thêm vào ở nội dung của phần á bạn!
-sao cái Top 10 yếu tố ảnh hưởng mạnh nhất thì nó toàn là district không á bạn, chứ không phải là các  biến mình đưa cho model học á 
-bạn cho mình lại toàn bộ phần latex được không? à cái phàn 5.2 của mình lúc này không phải là thay thế phần thay thế cái 5.2 thành cái mục khác á bạn, mình nghĩ cái công cụ thì có thêm vào ở nội dung của phần á bạn! 
-
-bạn chỉnh là cái 
+git add .
+git commit -m"Cap nhat them!"
+git push origin main
