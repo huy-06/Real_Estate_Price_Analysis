@@ -1,0 +1,128 @@
+SLIDE 1: BACKGROUND & PROBLEM CONTEXT
+[Visual/Text on Slide]
+- The real estate market: A core economic pillar.
+- Challenge: Determining true property value is difficult due to complex factors (location, legal status, amenities).
+- The solution: Leveraging Data Science to analyze listings and provide objective valuations.
+- Goal: Enhance market transparency and support effective decision-making.
+
+[Presenter Notes / What to say]
+"Hello everyone. Today our group will present our project on Real Estate Price Analysis and Prediction. Let's start with the background. The real estate market is a significant pillar of the economy, but evaluating true property value is notoriously difficult. Prices are driven by a complex mix of location, legal status, and surrounding amenities. Our project aims to solve this by using Data Science and Machine Learning to turn raw listing data into a clear, objective pricing model. This will help buyers and sellers make better, more transparent decisions."
+
+--------------------------------------------------
+
+SLIDE 2: RESEARCH QUESTION & OBJECTIVES
+[Visual/Text on Slide]
+- Research Question: "How can data analysis and machine learning tools be applied to interpret influencing factors and accurately predict real estate prices based on spatial characteristics and amenities?"
+- Objective 1 (Analysis): Explore relationships between prices and physical/spatial attributes.
+- Objective 2 (Prediction): Build a reliable forecasting model to provide reference prices and aid in negotiation.
+
+[Presenter Notes / What to say]
+"This brings us to our core research question: How can we use modern data tools to interpret these factors and accurately predict prices based on property traits and nearby amenities? To answer this, we set two main objectives: First, an analysis objective to uncover how attributes like area or location impact prices. Second, a prediction objective to build a machine learning model that gives users a reliable reference price to help them negotiate effectively."
+
+--------------------------------------------------
+
+SLIDE 3: DATASET OVERVIEW
+[Visual/Text on Slide]
+- Scope: 4 major markets (Hanoi, Da Nang, Ho Chi Minh City, Binh Duong).
+- Sources: 
+   1. Listing Data: Web Crawling from batdongsan.com.vn.
+   2. Spatial Data: OpenStreetMap (OSM) for infrastructure/amenities.
+- Raw Data Size: 39 variables.
+- 4 Main Groups: Listing Metadata, Geographical Location, Property Characteristics, External Amenities.
+
+[Presenter Notes / What to say]
+"To build a robust model, we needed rich data. We focused on four of the most vibrant markets in Vietnam: Hanoi, Da Nang, HCMC, and Binh Duong. We collected our data from two primary sources. We crawled property listings from batdongsan.com.vn, and we used OpenStreetMap to gather spatial data like nearby schools and hospitals. In total, our raw dataset contained 39 features, which we categorized into four logical groups: Metadata, Location, Property Characteristics, and External Amenities."
+
+--------------------------------------------------
+
+SLIDE 4: DATA PREPARATION & SQL EXTRACTION PLAN
+[Visual/Text on Slide]
+- Standardization: Converted text attributes (price, area) to numerical formats.
+- Deduplication & Cleaning: Standardized district names and removed duplicate listings.
+- Boundary Filtering: Kept prices between 500 million and 60 billion VND, and areas from 15m² to 1000m².
+- Feature Selection: Reduced to the 17 most vital features (e.g., price_total, area, num_floors, num_schools_1km).
+
+[Presenter Notes / What to say]
+"Raw data from the web is incredibly noisy. Our data preparation phase involved rigourous cleaning. We extracted numbers from text, standardized administrative names, and removed duplicates using SQL and Python. To ensure our model trains on realistic data, we filtered out outliers, keeping properties priced between 500 million and 60 billion VND, and areas between 15 and 1000 square meters. Finally, we performed feature selection to narrow down our 39 raw variables to the 17 most predictive features."
+
+--------------------------------------------------
+
+SLIDE 5: METHODOLOGY & WORKFLOW
+[Visual/Text on Slide]
+- Framework: OSEMN Workflow 
+  (Obtain -> Scrub -> Explore -> Model -> iNterpret)
+- Core Technologies:
+  - Database: SQL
+  - Analysis & Processing: Python (Pandas, Numpy)
+  - Visualization: Matplotlib, Seaborn
+  - Machine Learning: Scikit-learn, CatBoost, XGBoost, LightGBM
+  - Deployment: Streamlit, Folium (Interactive Map)
+
+[Presenter Notes / What to say]
+"For our methodology, we strictly adhered to the OSEMN Data Science framework: Obtain, Scrub, Explore, Model, and Interpret. Our tech stack was built entirely around Python. We used Pandas and Numpy for processing, Seaborn for visualizations, and advanced libraries like Scikit-learn and tree-based gradient boosting models for the Machine Learning phase. Finally, we deployed our solution using Streamlit and Folium to create an interactive web interface."
+
+--------------------------------------------------
+
+SLIDE 6: EXPLORATORY DATA ANALYSIS (EDA) & STATISTICS
+[Visual/Text on Slide]
+- Price Distribution: Right-skewed, heavily concentrated in the 1-10 Billion VND segment.
+- Regional Differences: HCMC & Hanoi command the highest prices; Da Nang & Binh Duong are more stable.
+- Key Correlations:
+  - Positive correlation between Area and Asset Value.
+  - Extremely strong correlation (0.80) between utility infrastructure (schools/hospitals) and property presence.
+
+[Presenter Notes / What to say]
+"Moving on to our Exploratory Data Analysis. We discovered that property values display a clear right-skewed distribution, with most listings falling in the 1 to 10 billion VND range. Regionally, Ho Chi Minh City and Hanoi have substantially higher and more volatile prices compared to Binh Duong and Da Nang. Our correlation heatmaps also revealed that area and the number of floors boost prices significantly, as expected. Interestingly, there's a huge 0.80 correlation relating to utility infrastructure like schools and hospitals, showing how vital neighborhood amenities are."
+
+--------------------------------------------------
+
+SLIDE 7: MODELLING / REGRESSION ANALYSIS
+[Visual/Text on Slide]
+- Preprocessing Pipeline: Missing value imputation, One-Hot Encoding, StandardScaler (80:20 Train/Test split).
+- Initial Linear Analysis (Ridge Regression):
+  - Confirmed distinct market trends (Central districts and Villas have huge positive weights).
+  - Accuracy limitation: R-squared only reached 0.57 due to complex non-linear relationships.
+- ML Experimentation: Evaluated 15 different Machine Learning algorithms to capture non-linear market patterns.
+
+[Presenter Notes / What to say]
+"For modelling, we set up a robust preprocessing pipeline using an 80:20 train-test split. We started with a baseline Ridge Regression model. It correctly identified that central districts and property types like Villas carry huge price premiums. However, properties have highly non-linear relationships with their environment, so the linear model's R-squared stalled at 0.57. Because of this, we experimented with 15 different, more advanced machine learning models to find the perfect fit."
+
+--------------------------------------------------
+
+SLIDE 8: KEY RESULTS & VISUALIZATIONS
+[Visual/Text on Slide]
+- The Best Model: Extra Trees (Extremely Randomized Trees)
+  - Performance: Highest R-squared score (0.84) and lowest error rates.
+- Practical Deployment:
+  - Built an interactive Streamlit Web App.
+  - Users click a location on a Folium map -> API fetches live amenity data -> Extra Trees model instantly predicts the price.
+
+[Presenter Notes / What to say]
+"Among the 15 models tested, the 'Extra Trees' algorithm emerged as the clear winner, achieving an impressive R-squared score of 0.84 with the lowest error margin. To bring this research to life, we packaged our model into a Streamlit Web Application. As you can see on the screen, users can simply click a point on an interactive map. In the background, it calls an API to count nearby amenities, feeds this into our Extra Trees model, and instantly returns a predicted property price."
+
+--------------------------------------------------
+
+SLIDE 9: DISCUSSION, LIMITATIONS, AND INSIGHTS
+[Visual/Text on Slide]
+- Insights: Successfully quantified the immense financial value of urban infrastructure and external amenities.
+- Limitations:
+  - Model trains on 'Asking Prices', which may differ from final transaction contracts.
+  - Lacks 'soft' variables (interior quality, Feng Shui, developer reputation).
+- Future Work: Implement Natural Language Processing (NLP) to read and extract sentiment/details from listing text descriptions.
+
+[Presenter Notes / What to say]
+"What did we learn? We successfully proved and quantified that urban infrastructure drastically inflates real estate value. However, we must acknowledge limitations. First, website listings represent asking prices, not always the final negotiated transaction price. Second, our model currently ignores 'soft' features like interior design quality, Feng Shui, or developer brand name. In the future, we plan to implement Natural Language Processing to extract these qualitative nuances from the text descriptions of the listings."
+
+--------------------------------------------------
+
+SLIDE 10: CONCLUSION & AI USAGE REFLECTION
+[Visual/Text on Slide]
+- Conclusion: Successfully completed a full Data Science lifecycle resulting in a highly accurate ML model and a practical Web App tool.
+- AI Usage Reflection (Gemini & ChatGPT):
+  - Used for project ideation, research framing, and deciding on data features.
+  - Assisted heavily in technical debugging: SQL data cleaning, Python EDA charts, and ML model tuning.
+  - Supported report formatting (LaTeX) and Dashboard layout generation.
+  - Accelerated learning and optimized project quality.
+
+[Presenter Notes / What to say]
+"In conclusion, we successfully executed a complete Data Science lifecycle, producing a highly capable predictive model and a functional web application. Finally, observing our AI usage reflection: Throughout this project, we actively leveraged generative AI like Gemini and ChatGPT. AI acted as our pair-programmer, helping us brainstorm data features, write complex SQL cleaning scripts, debug our Python visualizations, and structure our LaTeX report. Using AI didn't just speed up the process; it significantly elevated the overall quality and depth of our research. Thank you for listening!"

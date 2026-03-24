@@ -1,14 +1,17 @@
-# streamlit run app.py
+# streamlit run app_v2.py
 
 import streamlit as st
 import pandas as pd
 import joblib
 import folium
+from folium.plugins import Geocoder
 from streamlit_folium import st_folium
 import requests
 import re
 import plotly.express as px
 import os
+import numpy as np
+from sklearn.neighbors import BallTree
 
 # ---------------------------------------------------------
 # CÁC DANH SÁCH CHUẨN CỦA MÔ HÌNH (GỘP THÀNH DICTIONARY ĐỂ DỄ QUẢN LÝ)
@@ -43,23 +46,90 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 # ---------------------------------------------------------
 # HÀM HỖ TRỢ XỬ LÝ DỮ LIỆU TỪ BẢN ĐỒ
 # ---------------------------------------------------------
-def get_poi_count(lat, lon, radius, tags):
-    """Đếm tiện ích xung quanh tọa độ"""
-    overpass_url = "http://overpass-api.de/api/interpreter"
-    query_parts =[]
-    for k, v in tags:
-        query_parts.append(f'node["{k}"="{v}"](around:{radius},{lat},{lon});')
-        query_parts.append(f'way["{k}"="{v}"](around:{radius},{lat},{lon});')
-    query = f"[out:json];({''.join(query_parts)});out count;"
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+EARTH_RADIUS_METERS = 6371000
+
+def get_pois_manual(north, south, east, west):
+    """
+    Gửi yêu cầu trực tiếp tới Overpass API để lấy danh sách các địa điểm tiện ích.
+    Giống với file api.py trong thư mục scrape.
+    """
+    query = f"""
+    [out:json][timeout:600];
+    (
+      node["amenity"~"school|kindergarten|university|hospital|clinic|pharmacy|marketplace|cafe|restaurant|bank|atm"]({south},{west},{north},{east});
+      way["amenity"~"school|kindergarten|university|hospital|clinic|pharmacy|marketplace|cafe|restaurant|bank|atm"]({south},{west},{north},{east});
+      node["shop"~"supermarket|convenience|mall"]({south},{west},{north},{east});
+      way["shop"~"supermarket|convenience|mall"]({south},{west},{north},{east});
+      node["leisure"="park"]({south},{west},{north},{east});
+      way["leisure"="park"]({south},{west},{north},{east});
+    );
+    out center;
+    """
+
     try:
-        response = requests.get(overpass_url, params={'data': query}, timeout=10).json()
-        return int(response['elements'][0]['tags']['total'])
-    except:
-        return 0
+        response = requests.post(OVERPASS_URL, data={'data': query}, timeout=600)
+        response.raise_for_status()
+        data = response.json()
+    except Exception as e:
+        print(f"Lỗi khi gọi API: {e}")
+        return pd.DataFrame()
+
+    elements = data.get('elements', [])
+    
+    poi_list = []
+    for el in elements:
+        poi = {
+            'lat': el['lat'] if el['type'] == 'node' else el.get('center', {}).get('lat', 0),
+            'lon': el['lon'] if el['type'] == 'node' else el.get('center', {}).get('lon', 0),
+            'amenity': el.get('tags', {}).get('amenity'),
+            'shop': el.get('tags', {}).get('shop'),
+            'leisure': el.get('tags', {}).get('leisure')
+        }
+        poi_list.append(poi)
+
+    return pd.DataFrame(poi_list)
+
+def calculate_features(target_df, poi_df):
+    """
+    Tính toán số lượng tiện ích xung quanh các vị trí nhà ở dựa trên bán kính.
+    """
+    house_coords = np.radians(target_df[['latitude', 'longitude']].values)
+
+    def get_count(subset, radius_m):
+        if subset.empty:
+            return np.zeros(len(target_df), dtype=int)
+        
+        poi_coords = np.radians(subset[['lat', 'lon']].values)
+        tree = BallTree(poi_coords, metric='haversine')
+        return tree.query_radius(
+            house_coords, 
+            r=radius_m / EARTH_RADIUS_METERS, 
+            count_only=True
+        )
+
+    if poi_df.empty:
+        target_df['num_schools_1km'] = 0
+        target_df['num_hospitals_2km'] = 0
+        target_df['num_markets_1km'] = 0
+        return target_df
+
+    target_df['num_schools_1km'] = get_count(
+        poi_df[poi_df['amenity'].isin(['school', 'kindergarten', 'university'])], 1000
+    )
+    target_df['num_hospitals_2km'] = get_count(
+        poi_df[poi_df['amenity'].isin(['hospital', 'clinic'])], 2000
+    )
+    
+    mkt_tags = ['supermarket', 'mall', 'convenience']
+    target_df['num_markets_1km'] = get_count(
+        poi_df[(poi_df['shop'].isin(mkt_tags)) | (poi_df['amenity'] == 'marketplace')], 1000
+    )
+
+    return target_df
 
 def get_address_from_coords(lat, lon):
     """Lấy toàn bộ thông tin địa chỉ từ Nominatim (Bắt buộc trả về tiếng Việt)"""
-    # Thêm tham số &accept-language=vi để tránh lỗi API trả về tiếng Anh (Ho Chi Minh City)
     url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json&addressdetails=1&accept-language=vi"
     headers = {'User-Agent': 'RealEstateApp/1.0'}
     try:
@@ -76,39 +146,28 @@ def match_location_from_api(address_dict):
     matched_prov = "Hồ Chí Minh"
     matched_dist = None
     
-    # Gom tất cả các values API trả về thành chữ thường
     api_values =[str(v).lower() for v in address_dict.values()]
     
-    # 1. TÌM TỈNH / THÀNH PHỐ
     for prov in LOCATION_MAPPING.keys():
         prov_lower = prov.lower()
         if any(prov_lower in val for val in api_values):
             matched_prov = prov
             break
             
-    # 2. TÌM QUẬN / HUYỆN (Chỉ dò trong Tỉnh đã tìm thấy)
     dist_list = LOCATION_MAPPING[matched_prov]
-    
-    # Ưu tiên dò chữ dài trước (tránh dò Quận 1 trước Quận 10)
     sorted_districts = sorted(dist_list, key=len, reverse=True)
     
     for dist in sorted_districts:
         dist_lower = dist.lower()
-        
-        # Bỏ tiền tố để lấy lõi (VD: "Thành phố Dĩ An" -> "dĩ an")
         core_name = dist_lower
         for p in["thành phố ", "tỉnh ", "quận ", "huyện ", "thị xã ", "phường "]:
             core_name = core_name.replace(p, "").strip()
         
         for val in api_values:
             val_clean = val.replace(",", "").replace(".", "").strip()
-            
-            # Khớp tuyệt đối (VD: "quận 1")
             if dist_lower == val_clean or core_name == val_clean:
                 matched_dist = dist
                 break
-            
-            # Khớp bằng Regex để phân biệt ranh giới từ (Tránh lỗi 1 nhầm thành 10, 11)
             pattern = r'(?<!\d)' + re.escape(core_name) + r'(?!\d)'
             if re.search(pattern, val_clean):
                 matched_dist = dist
@@ -116,16 +175,60 @@ def match_location_from_api(address_dict):
                 
         if matched_dist: break
         
-    # Nếu dò mãi không ra thì lấy quận đầu tiên của Tỉnh đó làm mặc định
     if not matched_dist:
         matched_dist = dist_list[0]
         
     return matched_prov, matched_dist
 
 # ---------------------------------------------------------
+# CÚP CSS CHO NÚT DỰ ĐOÁN TO HƠN
+# ---------------------------------------------------------
+def local_css():
+    st.markdown("""
+        <style>
+        /* Tăng kích thước chữ cho các nút trong menu (Radio) */
+        div[role="radiogroup"] > label > div:first-of-type {
+            zoom: 1.5; /* Phóng to nút gạt (radio dot) */
+        }
+        div[role="radiogroup"] label p {
+            font-size: 24px !important; 
+            font-weight: bold !important;
+            padding-left: 10px;
+        }
+        [data-testid="stSidebar"] .stRadio > label {
+            font-size: 26px !important;
+            font-weight: bold !important;
+            color: #FF4B4B;
+        }
+
+        /* Tăng kích thước chữ cho các lable của Selectbox, Slider trong menu */
+        [data-testid="stSidebar"] .stSelectbox label p, 
+        [data-testid="stSidebar"] .stSlider label p {
+            font-size: 22px !important;
+            font-weight: bold !important;
+        }
+
+        /* Tùy chỉnh CSS cho nút dự đoán giá bản lớn */
+        .stButton>button {
+            height: 4em;
+            background-color: #ff4b4b !important;
+            color: white !important;
+            font-size: 24px !important;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        .stButton>button>div>p {
+            font-size: 24px !important;
+            font-weight: bold !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
 # 1. CÀI ĐẶT TRANG & THANH ĐIỀU HƯỚNG
 # ---------------------------------------------------------
 st.set_page_config(page_title="Dự đoán giá BĐS", layout="wide")
+local_css()
 menu = st.sidebar.radio("Menu",["📊 Tổng quan thị trường", "🤖 Dự đoán giá"])
 
 # ---------------------------------------------------------
@@ -136,10 +239,8 @@ if menu == "📊 Tổng quan thị trường":
     
     @st.cache_data
     def load_data(): 
-        # Tải dữ liệu và tạo thêm cột giá trị theo Tỷ VNĐ để dễ xem
         data_path = os.path.join(CURRENT_DIR, "data", "cleaned_data.csv")
         df = pd.read_csv(data_path)
-
         if 'price_total' in df.columns:
             df['price_billion'] = df['price_total'] / 1e9
         return df
@@ -147,21 +248,16 @@ if menu == "📊 Tổng quan thị trường":
     try:
         df = load_data()
         
-        # --- BỘ LỌC DỮ LIỆU (SIDEBAR) ---
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 🔍 Bộ lọc dữ liệu EDA")
         
-        # Lọc theo Tỉnh/Thành phố
         prov_list = ["Tất cả"] + list(df['province'].dropna().unique())
         selected_prov = st.sidebar.selectbox("📍 Chọn Tỉnh/Thành phố", prov_list)
         
-        # Lọc theo Loại BĐS
         cat_list = ["Tất cả"] + list(df['category'].dropna().unique())
         selected_cat = st.sidebar.selectbox("🏠 Chọn Loại BĐS", cat_list)
         
-        # Lọc theo Khoảng giá (Tỷ VNĐ)
         max_price = float(df['price_billion'].max())
-        # Cắt mức giá ở percentile 98 để thanh trượt không bị dãn quá mức bởi các outlier (nhà siêu đắt)
         slider_max = float(df['price_billion'].quantile(0.98)) 
         price_range = st.sidebar.slider(
             "💰 Mức giá (Tỷ VNĐ)", 
@@ -171,7 +267,6 @@ if menu == "📊 Tổng quan thị trường":
             step=0.5
         )
 
-        # --- ÁP DỤNG BỘ LỌC VÀO DATAFRAME ---
         filtered_df = df.copy()
         if selected_prov != "Tất cả":
             filtered_df = filtered_df[filtered_df['province'] == selected_prov]
@@ -181,31 +276,27 @@ if menu == "📊 Tổng quan thị trường":
         filtered_df = filtered_df[(filtered_df['price_billion'] >= price_range[0]) & 
                                   (filtered_df['price_billion'] <= price_range[1])]
 
-        # Kiểm tra nếu bộ lọc không có dữ liệu
         if len(filtered_df) == 0:
             st.warning("⚠️ Không có dữ liệu nào phù hợp với bộ lọc hiện tại. Vui lòng điều chỉnh lại!")
         else:
-            # --- CÁC CHỈ SỐ TỔNG QUAN (METRICS) ---
             col1, col2, col3 = st.columns(3)
             col1.metric("Tổng số bài đăng", f"{len(filtered_df):,}")
             col2.metric("Giá trung bình (Tỷ VNĐ)", round(filtered_df['price_billion'].mean(), 2))
             col3.metric("Diện tích trung bình (m2)", round(filtered_df['area'].mean(), 1))
             st.divider()
 
-            # --- BẢN ĐỒ TƯƠNG TÁC (CHẤM MÀU THEO GIÁ) ---
             st.subheader("📍 Bản đồ phân bổ Bất Động Sản theo Giá trị")
             st.markdown("*(Chấm màu càng đỏ giá càng cao, kích thước chấm thể hiện diện tích)*")
             
-            # Xóa các dòng thiếu tọa độ để vẽ bản đồ không bị lỗi
             map_df = filtered_df.dropna(subset=['latitude', 'longitude'])
             
             fig_map = px.scatter_mapbox(
                 map_df, 
                 lat="latitude", 
                 lon="longitude", 
-                color="price_billion", # Màu sắc theo giá
-                size="area",           # Kích thước theo diện tích
-                color_continuous_scale=px.colors.sequential.YlOrRd, # Thang màu Vàng -> Đỏ
+                color="price_billion", 
+                size="area",           
+                color_continuous_scale=px.colors.sequential.YlOrRd, 
                 size_max=15, 
                 zoom=10 if selected_prov != "Tất cả" else 5, 
                 mapbox_style="open-street-map",
@@ -213,31 +304,26 @@ if menu == "📊 Tổng quan thị trường":
                 hover_data={"category": True, "price_billion": True, "area": True, "latitude": False, "longitude": False},
                 labels={"price_billion": "Giá (Tỷ)", "area": "Diện tích (m2)", "category": "Loại"}
             )
-            fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}) # Bỏ viền thừa của bản đồ
+            fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}) 
             
-            # THÊM config={'scrollZoom': True} ĐỂ CHO PHÉP ZOOM BẰNG CON LĂN CHUỘT
             st.plotly_chart(fig_map, use_container_width=True, config={'scrollZoom': True, 'displayModeBar': True})
             
             st.divider()
 
-            # --- VẼ BIỂU ĐỒ TỔNG QUAN ---
-            # Hàng 1: Tỷ lệ loại hình & Phân bố giá
             chart_col1, chart_col2 = st.columns(2)
             
             with chart_col1:
-                # Biểu đồ Donut Chart (Tỷ lệ loại BĐS)
                 fig_pie = px.pie(
                     filtered_df, 
                     names='category', 
                     title='Tỷ lệ các loại hình BĐS', 
-                    hole=0.4, # Tạo lỗ ở giữa (Donut chart)
+                    hole=0.4, 
                     color_discrete_sequence=px.colors.qualitative.Pastel
                 )
                 fig_pie.update_traces(textposition='inside', textinfo='percent+label')
                 st.plotly_chart(fig_pie, use_container_width=True)
                 
             with chart_col2:
-                # Biểu đồ Histogram (Phân bố mức giá)
                 fig_hist = px.histogram(
                     filtered_df, 
                     x='price_billion', 
@@ -249,19 +335,15 @@ if menu == "📊 Tổng quan thị trường":
                 fig_hist.update_layout(yaxis_title="Số lượng bài đăng")
                 st.plotly_chart(fig_hist, use_container_width=True)
 
-            # Hàng 2: So sánh giá theo khu vực & Scatter Plot
             chart_col3, chart_col4 = st.columns(2)
             
             with chart_col3:
-                # Biểu đồ cột so sánh giá khu vực
                 if selected_prov != "Tất cả":
-                    # Nếu đã chọn Tỉnh, so sánh giá giữa các Quận/Huyện của Tỉnh đó
                     bar_data = filtered_df.groupby('district')['price_billion'].mean().sort_values(ascending=True).reset_index()
                     title_bar = f'Giá nhà trung bình theo Quận/Huyện ({selected_prov})'
                     y_axis = 'district'
                     y_label = 'Quận / Huyện'
                 else:
-                    # Nếu chọn "Tất cả", so sánh giá giữa các Tỉnh/Thành phố
                     bar_data = filtered_df.groupby('province')['price_billion'].mean().sort_values(ascending=True).reset_index()
                     title_bar = 'Giá nhà trung bình theo Tỉnh/Thành phố'
                     y_axis = 'province'
@@ -271,7 +353,7 @@ if menu == "📊 Tổng quan thị trường":
                     bar_data, 
                     x='price_billion', 
                     y=y_axis, 
-                    orientation='h', # Cột nằm ngang cho dễ đọc tên dài
+                    orientation='h', 
                     title=title_bar, 
                     color='price_billion',
                     color_continuous_scale=px.colors.sequential.Blues,
@@ -280,14 +362,13 @@ if menu == "📊 Tổng quan thị trường":
                 st.plotly_chart(fig_bar, use_container_width=True)
 
             with chart_col4:
-                # Biểu đồ phân tán (Scatter) - Mối quan hệ Diện tích & Giá
                 fig_scatter = px.scatter(
                     filtered_df, 
                     x='area', 
                     y='price_billion', 
                     color='category', 
                     title='Mối quan hệ giữa Diện tích và Giá tiền',
-                    opacity=0.6, # Làm mờ chấm để thấy các điểm trùng nhau
+                    opacity=0.6, 
                     hover_data=['district'],
                     labels={'area': 'Diện tích (m2)', 'price_billion': 'Giá (Tỷ VNĐ)', 'category': 'Loại BĐS'}
                 )
@@ -312,7 +393,6 @@ elif menu == "🤖 Dự đoán giá":
         st.error("❌ Không tìm thấy file `data/extra_trees_pipeline.joblib`.")
         st.stop()
 
-    # --- KHỞI TẠO BIẾN SESSION STATE (Lưu trạng thái) ---
     if "lat" not in st.session_state:
         st.session_state.lat = 10.938  
         st.session_state.lon = 106.767 
@@ -323,10 +403,14 @@ elif menu == "🤖 Dự đoán giá":
         st.session_state.district = "Quận 1"
 
     st.markdown("### 📍 Bước 1: Chọn vị trí Bất Động Sản trên bản đồ")
-    st.info("💡 Click vào bản đồ: Hệ thống sẽ tự động quét Quận/Huyện, Tỉnh/Thành phố và đếm trường học, siêu thị xung quanh!")
+    st.info("💡 Click vào bản đồ: Hệ thống sẽ tự động quét Quận/Huyện, Tỉnh/Thành phố và đếm trường học, siêu thị xung quanh (theo api)!")
 
     m = folium.Map(location=[st.session_state.lat, st.session_state.lon], zoom_start=13)
     folium.Marker([st.session_state.lat, st.session_state.lon], tooltip="Vị trí đang chọn", icon=folium.Icon(color="red")).add_to(m)
+    
+    # THÊM THANH TÌM KIẾM (GEOCODER)
+    Geocoder().add_to(m)
+    
     map_data = st_folium(m, height=400, width=1000)
 
     # --- XỬ LÝ KHI CLICK VÀO BẢN ĐỒ ---
@@ -338,21 +422,31 @@ elif menu == "🤖 Dự đoán giá":
             st.session_state.lat = c_lat
             st.session_state.lon = c_lon
             
-            with st.spinner("⏳ Đang phân tích địa chỉ và quét tiện ích xung quanh..."):
+            with st.spinner("⏳ Đang phân tích địa chỉ và quét tiện ích xung quanh (sử dụng logic BallTree từ Overpass API)..."):
                 # 1. Quét Địa Chỉ
                 address_dict = get_address_from_coords(c_lat, c_lon)
                 st.session_state.province, st.session_state.district = match_location_from_api(address_dict)
                 
-                # 2. Quét Tiện Ích
-                school_tags =[("amenity", "school"), ("amenity", "kindergarten"), ("amenity", "college")]
-                market_tags =[("amenity", "marketplace"), ("shop", "supermarket"), ("shop", "convenience")]
-                hospital_tags = [("amenity", "hospital"), ("amenity", "clinic")]
+                # 2. Xử lý logic giống file api.py
+                buffer = 0.02 # Lấy vùng xung quanh vị trí chọn (khỏang 2km)
+                north, south = c_lat + buffer, c_lat - buffer
+                east, west = c_lon + buffer, c_lon - buffer
                 
-                st.session_state.schools = get_poi_count(c_lat, c_lon, 1000, school_tags)
-                st.session_state.markets = get_poi_count(c_lat, c_lon, 1000, market_tags)
-                st.session_state.hospitals = get_poi_count(c_lat, c_lon, 2000, hospital_tags)
+                pois_df = get_pois_manual(north, south, east, west)
+                
+                target_df = pd.DataFrame({'latitude': [c_lat], 'longitude': [c_lon]})
+                result_df = calculate_features(target_df, pois_df)
+                
+                if not result_df.empty:
+                    st.session_state.schools = int(result_df['num_schools_1km'].iloc[0])
+                    st.session_state.markets = int(result_df['num_markets_1km'].iloc[0])
+                    st.session_state.hospitals = int(result_df['num_hospitals_2km'].iloc[0])
+                else:
+                    st.session_state.schools = 0
+                    st.session_state.markets = 0
+                    st.session_state.hospitals = 0
             
-            st.rerun() # Refresh lại trang ngay lập tức để cập nhật số liệu
+            st.rerun() 
 
     st.divider()
     st.markdown("### 📝 Bước 2: Nhập các thông tin chi tiết khác")
@@ -362,27 +456,21 @@ elif menu == "🤖 Dự đoán giá":
     with col1:
         st.markdown("**1. Hành chính & Pháp lý**")
         
-        # Lấy danh sách Tỉnh/Thành phố
         provinces_list = list(LOCATION_MAPPING.keys())
         current_prov = st.session_state.province if st.session_state.province in provinces_list else "Hồ Chí Minh"
         
-        # Chọn Tỉnh / Thành Phố
         province = st.selectbox("Tỉnh/Thành phố", provinces_list, index=provinces_list.index(current_prov))
         
-        # --- Logic tự động thay đổi Quận/Huyện khi user đổi Tỉnh bằng tay ---
         if province != st.session_state.province:
             st.session_state.province = province
-            st.session_state.district = LOCATION_MAPPING[province][0] # Đổi tỉnh -> reset quận về vị trí 0
+            st.session_state.district = LOCATION_MAPPING[province][0] 
             st.rerun()
             
-        # Lấy danh sách Quận/Huyện DỰA TRÊN Tỉnh đang chọn
         districts_list = LOCATION_MAPPING[st.session_state.province]
         current_dist = st.session_state.district if st.session_state.district in districts_list else districts_list[0]
         
-        # Chọn Quận / Huyện
         district = st.selectbox("Quận/Huyện", districts_list, index=districts_list.index(current_dist))
         
-        # Cập nhật state nếu user đổi tay Quận/Huyện
         if district != st.session_state.district:
             st.session_state.district = district
         
@@ -408,14 +496,15 @@ elif menu == "🤖 Dự đoán giá":
 
     st.divider()
 
+    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
     if st.button("🚀 BẮT ĐẦU DỰ ĐOÁN GIÁ", type="primary", use_container_width=True):
         input_data = pd.DataFrame({
             'area':[area],
             'category': [category],
             'latitude': [st.session_state.lat], 
             'longitude': [st.session_state.lon],
-            'district': [st.session_state.district], # Đã lấy từ session state chuẩn
-            'province': [st.session_state.province], # Đã lấy từ session state chuẩn
+            'district': [st.session_state.district], 
+            'province': [st.session_state.province], 
             'legal_status': [legal_status],
             'frontage': [frontage],
             'road_width': [road_width], 
@@ -435,3 +524,4 @@ elif menu == "🤖 Dự đoán giá":
             st.markdown(f"<p style='text-align: center;'>(Tương đương khoảng: {prediction_vnd:,.0f} VNĐ)</p>", unsafe_allow_html=True)
         except Exception as e:
             st.error(f"⚠️ Có lỗi xảy ra trong quá trình dự đoán. Chi tiết lỗi: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)

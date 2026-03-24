@@ -1,0 +1,314 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+% Margin optimization to save space
+\usepackage[top=1.8cm, bottom=1.8cm, left=2cm, right=2cm]{geometry} 
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float} 
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{enumitem} 
+
+\titlespacing*{\section}{0pt}{1ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{0.8ex plus 1ex minus .2ex}{0.3ex plus .2ex}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{0.5em}{}
+
+\linespread{1.1} % Line spacing 1.1 for a clean and readable layout
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{0.3cm}
+        \textbf{\large FPT UNIVERSITY}\\[0.5cm]
+        \textbf{\large Course: ADY201m}\\[1.5cm] 
+
+        \includegraphics[width=0.35\textwidth]{fpt_logo.png}\\[1.5cm]
+
+        \textbf{\LARGE PROJECT REPORT}\\[1cm]
+        \textbf{\Large REAL ESTATE PRICE ANALYSIS AND PREDICTION}\\[2cm]
+
+        \begin{table}[h]
+            \centering
+            \large
+            \renewcommand{\arraystretch}{1.2} 
+            \begin{tabular}{ll}
+                \textbf{Group Members:} & \\ 
+                SE201725 & Nguyen Gia Huy \\
+                SE203377 & Tran Canh Nhat Minh \\
+                SE204049 & Nguyen Xuan Binh \\
+                SE201652 & Dang Thai Nguyen \\
+            \end{tabular}
+        \end{table}
+
+        \vfill
+        \textbf{Month \the\month, \the\year}
+    \end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+\pagestyle{plain}
+\setcounter{page}{1}
+
+\section{Introduction}
+The real estate market plays a pillar role in the economy but is often subjected to complex, multi-dimensional impacts from factors such as location, legal status, and amenities, making the determination of true property value a major challenge. This project approaches the problem by applying data science to exploit the rich source of information from real estate listings. The core objective is to quantify the impact of key attributes and build a reliable price prediction model. The research results are expected to provide an objective reference base, supporting effective decision-making for market participants and contributing to overall transparency.
+
+\textbf{Research Question:} \textit{"How can data analysis and machine learning tools be applied to interpret influencing factors and accurately predict real estate prices based on spatial characteristics and amenities?"}
+
+\subsection{Analysis and Prediction Objectives}
+\textbf{Analysis:} Focus on exploring the relationship between prices and attributes (area, location, amenities, legal status). The team evaluates the trend of price distribution by region and property type, while identifying potential legal risks from listing data.
+
+\textbf{Prediction:} Build a price forecasting model based on user input information. The results provide a reference price to compare with the asking price, helping buyers negotiate more effectively.
+
+\section{Data Collection}
+To ensure a rich and multi-dimensional database for the analytical model, the research team aggregated data from two main sources: market transaction information and spatial data on urban infrastructure.
+
+\subsection{Real Estate Data}
+The scope of data collection focuses on the 4 most vibrant markets in the country, including: \textbf{Hanoi, Da Nang, Ho Chi Minh City, and Binh Duong}. Selecting these areas ensures a sufficiently large sample size and accurately reflects general market trends. The team utilized automated data collection techniques (Web Crawling) on the platform \textit{batdongsan.com.vn} to extract important attributes such as selling price, area, house structure, and legal status.
+
+\subsection{Geographical and Amenity Data}
+Besides listing information, the location factor is quantified through the open map data \textbf{OpenStreetMap (OSM)}. The team applied spatial calculation algorithms to compile statistics on the density of essential amenities (schools, healthcare, commercial centers) within a defined radius around each property, thereby enriching the input information for the prediction model.
+
+\section{Overview of Raw Data}
+After the collection process, the raw dataset includes a total of \textbf{39 data fields}. Due to the large number of variables, the team categorized them into 4 main groups for convenient management before processing:
+
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.1} 
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Data Group} & \textbf{No. of Vars} & \textbf{Description of Representative Variables} \\ \hline
+\textbf{1. Listing Metadata} & 10 vars & Listing management info: \textit{post\_id, url, published\_date, seller\_name...} helps identify and filter spam listings. \\ \hline
+\textbf{2. Geographical Location} & 9 vars & Administrative levels (\textit{province, district, ward...}) and coordinates (\textit{latitude, longitude}). \\ \hline
+\textbf{3. Property Characteristics} & 14 vars & Asset information: \textit{price\_total, area, num\_floors, num\_bedrooms, direction...} \\ \hline
+\textbf{4. External Amenities} & 6 vars & Number of amenities from OSM: \textit{num\_schools\_1km, num\_hospitals\_2km...} \\ \hline
+\end{tabularx}
+\caption{Overview of raw data structure (39 columns)}
+\label{tab:raw_data}
+\end{table}
+
+\section{Methodology \& Tools}
+
+\subsection{Workflow}
+The project strictly adheres to the OSEMN Data Science process: \textbf{O}btain $\rightarrow$ \textbf{S}crub $\rightarrow$ \textbf{E}xplore $\rightarrow$ \textbf{M}odel $\rightarrow$ i\textbf{N}terpret.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth]{osemn.png} 
+    \caption{OSEMN Data Analysis Process}
+    \label{fig:osemn}
+\end{figure}
+
+\subsection{Detailed Task Assignment}
+Based on the OSEMN framework, the team divided the project into 5 main phases. Each phase includes specific tasks assigned to members as follows:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+
+\begin{tabularx}{\textwidth}{|p{2.5cm}|c|X|p{3.0cm}|}
+\hline
+\textbf{Phase} & \textbf{No.} & \textbf{Task Description} & \textbf{Member(s)} \\ \hline
+
+\multirow{2}{2.5cm}{\textbf{1. Obtain}} 
+ & 1 & Define objectives and data criteria. & All members \\ \cline{2-4}
+ & 2 & Collect data (Web Crawling, API). & All members \\ \hline
+
+\multirow{2}{2.5cm}{\textbf{2. Scrub}} 
+ & 3 & Check and handle noisy and missing data. & Huy, Minh \\ \cline{2-4}
+ & 4 & Standardize and merge into a unified dataset. & Huy, Minh \\ \hline
+
+\multirow{2}{2.5cm}{\textbf{3. Explore}} 
+ & 5 & Visualize data (Charts, Heatmaps). & Huy, Nguyen \\ \cline{2-4}
+ & 6 & Analyze trends and select features. & Huy, Binh, Nguyen \\ \hline
+
+\multirow{3}{2.5cm}{\textbf{4. Model}} 
+ & 7 & Feature engineering: Encoding, Data splitting. & Binh \\ \cline{2-4}
+ & 8 & Train Machine Learning models. & Huy, Binh \\ \cline{2-4}
+ & 9 & Hyperparameter tuning (Model Tuning). & Binh \\ \hline
+
+\multirow{2}{2.5cm}{\textbf{5. iNterpret}} 
+ & 10 & Evaluate model results. & Nguyen \\ \cline{2-4}
+ & 11 & Summarize, conclude, and write the report. & All members \\ \hline
+
+\end{tabularx}
+\caption{Task assignment table based on the 5 OSEMN phases}
+\label{tab:osemn_assignment_final}
+\end{table}
+
+\subsection{Tools and Libraries}
+To ensure computational performance and visualization according to the above process, the team uses the following ecosystem:
+\begin{itemize}[noitemsep, topsep=0pt]
+    \item \textbf{Database:} Relational Database (SQL) used to manage, store, and extract data.
+    \item \textbf{Processing \& Analysis (Python):} \texttt{pandas} (Dataframe manipulation), \texttt{numpy} (numerical computation).
+    \item \textbf{Visualization (Python):} \texttt{matplotlib}, \texttt{seaborn} (plotting EDA charts).
+    \item \textbf{Machine Learning:} \texttt{scikit-learn, catboost, xgboost, lightgbm} (data preprocessing, model building, and training).
+    \item \textbf{Deployment:} \texttt{Streamlit} (Web interface creation) and \texttt{Folium} (map display).
+\end{itemize}
+
+\section{Data Processing Methods}
+Raw data collected from online environments often contains a lot of noise, inconsistent formats, and missing values. Based on the tools mentioned in the previous section, the team conducted a strict preprocessing procedure to prepare inputs for the model.
+
+\subsection{Data Cleaning and Standardization}
+The processing procedure focuses on resolving formatting and consistency issues:
+\begin{itemize}[noitemsep, topsep=0pt]
+    \item \textbf{Format Standardization:} Quantitative attributes (price, area) were extracted and converted from text format to numerical format.
+    \item \textbf{Data Synchronization:} Standardized administrative location information (District/County) into a unified standard category, removing incorrect name variations.
+    \item \textbf{Deduplication:} Identified and removed duplicate listings to ensure data uniqueness.
+    \item \textbf{Data Range Filtering:} Removed outliers, keeping only properties priced from \textbf{500 million to 60 billion VND}, with an area ranging from \textbf{15m$^2$ to 1000m$^2$}.
+\end{itemize}
+
+\subsection{Missing Data Handling and Feature Selection}
+From the cleaned dataset, the team further filtered:
+\begin{itemize}[noitemsep, topsep=0pt]
+    \item \textbf{Handling Missing Values:} Applied flexible imputation strategies based on the specific characteristics and distribution of each property type.
+    \item \textbf{Feature Selection:} Removed variables that held no predictive value or caused model noise. The final result retained the \textbf{17 most important feature attributes} (as shown in Table \ref{tab:final_features_grouped}).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|c|p{3.2cm}|c|X|}
+\hline
+\textbf{Variable Group} & \textbf{No.} & \textbf{Variable Name} & \textbf{Type} & \textbf{Usage Meaning} \\ \hline
+\multirow{2}{2.5cm}{\textbf{1. Target}} 
+ & 1 & \texttt{price\_total} & Int & Target variable: Total amount (VND). \\ \cline{2-5}
+ & 2 & \texttt{price\_per\_m2} & Float & Reference unit price (VND/m$^2$). \\ \hline
+\multirow{4}{2.5cm}{\textbf{2. Location}} 
+ & 3 & \texttt{province} & Category & Province/City. \\ \cline{2-5}
+ & 4 & \texttt{district} & Category & District. \\ \cline{2-5}
+ & 5 & \texttt{latitude} & Float & Latitude. \\ \cline{2-5}
+ & 6 & \texttt{longitude} & Float & Longitude. \\ \hline
+\multirow{8}{2.5cm}{\textbf{3. Property Characteristics}} 
+ & 7 & \texttt{area} & Float & Usable area (m$^2$). \\ \cline{2-5}
+ & 8 & \texttt{category} & Category & Property type (Apartment, etc.). \\ \cline{2-5}
+ & 9 & \texttt{legal\_status} & Category & Legal status (Red book, etc.). \\ \cline{2-5}
+ & 10 & \texttt{frontage} & Float & Frontage width (m). \\ \cline{2-5}
+ & 11 & \texttt{road\_width} & Float & Access road width (m). \\ \cline{2-5}
+ & 12 & \texttt{num\_bedrooms} & Int & Number of bedrooms. \\ \cline{2-5}
+ & 13 & \texttt{num\_toilets} & Int & Number of toilets. \\ \cline{2-5}
+ & 14 & \texttt{num\_floors} & Int & Number of floors. \\ \hline
+\multirow{3}{2.5cm}{\textbf{4. Amenities}} 
+ & 15 & \texttt{num\_schools\_1km} & Int & School density (1km radius). \\ \cline{2-5}
+ & 16 & \texttt{num\_hospitals\_2km} & Int & Healthcare density (2km radius). \\ \cline{2-5}
+ & 17 & \texttt{num\_markets\_1km} & Int & Market density (1km radius). \\ \hline
+\end{tabularx}
+\caption{List of 17 feature variables categorized by logical groups}
+\label{tab:final_features_grouped}
+\end{table}
+
+\section{Exploratory Data Analysis (EDA)}
+
+\subsection{Property Value Distribution \& Correlation with Area}
+Through the total property value distribution chart, it can be seen that the data exhibits a clearly right-skewed distribution. The vast majority of listings are heavily concentrated in the price segment from 1 to 10 billion VND. The number of properties gradually decreases as the price increases. Premium segment assets account for a very small proportion.
+
+Area is the feature with the largest impact weight. The scatter plot shows a clear positive correlation: The larger the area, the higher the total asset value. The team filtered out outliers (extremely large area but overly cheap price, or vice versa) to ensure input quality for the model.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{phan_bo_gia.png}
+        \caption{Distribution of Total Value (Billion VND)}
+        \label{fig:phan_bo_gia}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{scatter_dien_tich.png}
+        \caption{Correlation between Area and Price}
+        \label{fig:scatter_dien_tich}
+    \end{minipage}
+\end{figure}
+
+\subsection{Value Differentiation by Region}
+The data shows a clear differentiation in price levels among the 4 regions. Ho Chi Minh City and Hanoi have the highest average prices and large fluctuation margins. Conversely, Binh Duong and Da Nang are concentrated in a more stable price segment. This confirms that \texttt{province} and \texttt{district} are extremely important categorical variables in the model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{gia_theo_khu_vuc.png}
+    \caption{Average Price Segmented by Region}
+    \label{fig:gia_theo_khu_vuc}
+\end{figure}
+
+\subsection{Correlation Matrix between Variables}
+To quantify the relationship between numerical features, the team used a Correlation Matrix (Heatmap). This matrix helps identify which factors have the strongest impact on real estate value.
+
+The indices on the matrix show that total price (\texttt{price\_total}) has a distinct positive correlation with three main factors: Area (\texttt{area} - 0.32), Number of floors (\texttt{num\_floors} - 0.33), and Market/Supermarket density (\texttt{num\_markets\_1km} - 0.31). This result reflects market reality: large-scale houses located near bustling trading areas will have higher values. In addition, the concentration of utility infrastructure (schools and hospitals) has an extremely strong correlation (0.80), aiding the machine learning model in easily recognizing patterns.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{ma_tran_tuong_quan.png}
+    \caption{Correlation Matrix (Heatmap) between 12 numerical features}
+    \label{fig:ma_tran_tuong_quan}
+\end{figure}
+
+\section{Model Building and Training}
+\subsection{Preprocessing Pipeline}
+The team built an automated \texttt{Pipeline}: Imputing missing values, encoding categorical variables (One-Hot Encoder), and scaling quantitative variables (StandardScaler). The data was divided into Training and Testing sets at an \textbf{80:20} ratio.
+
+\subsection{Regression Analysis}
+Before building complex forecasting models, the team used \textbf{Ridge Regression} to evaluate the linear impact of each feature on house prices (Figure \ref{fig:ridge_coefficients}). The results showed:
+
+\begin{itemize}[noitemsep, topsep=0pt]
+    \item \textbf{Confirming patterns:} District variables (\texttt{district}) completely dominated the weight rankings. Central districts (Tay Ho, Ba Dinh, District 1) carry very large positive coefficients (strongly increasing prices), while suburban districts (Ba Vi, Cu Chi) carry large negative coefficients (decreasing prices).
+    \item \textbf{Property Type:} The variable \texttt{category\_Villas, Townhouses} is the only non-location factor to reach the top, showing that this premium property type adds immense value to an asset.
+    \item \textbf{Limitations of linear models:} Although Ridge explains market trends well, the overall accuracy ($R^2$) only reached \textbf{0.57}. The interaction between location, amenities, and area in reality is non-linear, requiring more powerful machine learning algorithms for accurate forecasting.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{ridge_coefficients.png}
+    \caption{Top 10 Factors with the Largest Regression Weights Impacting House Prices}
+    \label{fig:ridge_coefficients}
+\end{figure}
+
+\subsection{Machine Learning Model Evaluation and Selection}
+The team empirically trained 15 different Machine Learning algorithms (Ensemble, Tree-based, Boosting, etc.).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{bang_ket_qua_model.png}
+    \caption{Performance Ranking of 15 Machine Learning Models}
+    \label{fig:bang_ket_qua_model}
+\end{figure}
+
+\textbf{Decision:} Based on the results table, \textbf{Extra Trees (Extremely Randomized Trees)} was the leading model with the highest $R^2$ score (0.84) and lowest error. This algorithm provides high accuracy by combining multiple decision trees, minimizing overfitting through a random split selection mechanism. The team decided to select Extra Trees as the core model for deployment.
+
+\section{Discussion and Limitations}
+\textbf{Practical Significance:} The model successfully quantified the value of "external amenities" (schools, supermarkets), thereby affirming the importance of infrastructure planning on real estate values. The prediction results assist buyers and sellers in referencing objective prices, reducing information asymmetry in the market.
+
+\textbf{Limitations \& Future Directions:} Data from listings is often the \textbf{asking price} (seller's expectation), which may differ from the actual final transaction price on contracts. Additionally, the model has not yet captured "soft" variables such as interior design quality, Feng Shui orientation, or developer reputation. Future development directions will involve combining Natural Language Processing (NLP) techniques to analyze the "text description" sections of listings.
+
+\section{Practical Application Deployment}
+To actualize the model's value, the team used the \textbf{Streamlit} framework to build an interactive Web application. The interface integrates a smart map (Folium). When users click to select a location, the system automatically calls APIs (\textit{Nominatim \& Overpass}) to scan coordinates and count amenities. Combined with the Extra Trees model in the backend, the application instantly returns an estimated price (Billion VND) with an intuitive experience.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{app_demo.png}
+    \caption{Web App Interface Integrating AI Real Estate Valuation Map}
+    \label{fig:app_demo}
+\end{figure}
+
+\section{Conclusion}
+The project successfully executed a complete Data Science lifecycle, from data collection and analysis to Machine Learning model building. Successfully fine-tuning the Extra Trees algorithm provided good explanatory power for the problem of house price fluctuations. The outcome of the smart valuation Web App not only answers the research question well but also proves the tremendous practical value of artificial intelligence in the economic and real estate sectors.
+
+\end{document}

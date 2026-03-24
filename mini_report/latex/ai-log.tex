@@ -1,0 +1,146 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2cm]{geometry} 
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float} 
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\hypersetup{
+    colorlinks=false,
+    pdfborderstyle={/S/U/W 1},
+    pdfborder={0 0 1},
+    linkbordercolor=black,
+    urlbordercolor=black
+}
+
+\titlespacing*{\section}{0pt}{1.5ex plus 1ex minus .2ex}{1.0ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{0.5em}{}
+
+\linespread{1.15} 
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{0.5cm}
+        \textbf{\large TRƯỜNG ĐẠI HỌC FPT}\\[0.5cm]
+        \textbf{\large Môn học: ADY201m}\\[2cm] 
+
+        \includegraphics[width=0.4\textwidth]{fpt_logo.png}\\[2cm]
+
+        \textbf{\LARGE NHẬT KÝ TƯƠNG TÁC AI}\\[1cm]
+        \textbf{\Large ĐỀ TÀI: PHÂN TÍCH VÀ DỰ ĐOÁN GIÁ BẤT ĐỘNG SẢN}\\[2cm]
+
+        \begin{table}[h]
+            \centering
+            \large
+            \renewcommand{\arraystretch}{1.3} 
+            \begin{tabular}{ll}
+                \textbf{Thành viên nhóm:} & \\ 
+                SE201725 & Nguyễn Gia Huy \\
+                SE203377 & Trần Cảnh Nhật Minh \\
+                SE204049 & Nguyễn Xuân Bình \\
+                SE201652 & Đặng Thái Nguyên \\
+            \end{tabular}
+        \end{table}
+
+        \vfill
+        \textbf{Tháng \the\month \ năm \the\year}
+    \end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section*{Lời mở đầu về việc ứng dụng AI}
+\addcontentsline{toc}{section}{Lời mở đầu về việc ứng dụng AI}
+Trong quá trình thực hiện dự án này, nhóm nghiên cứu đã sử dụng các công cụ Trí tuệ nhân tạo (AI) như \textbf{Gemini} và \textbf{ChatGPT} với vai trò hỗ trợ tham khảo. AI đã giúp nhóm giải quyết các khó khăn về mặt kỹ thuật, gợi ý các đoạn mã nguồn tham khảo và hỗ trợ định hướng các bước thực hiện khi nhóm mới bắt đầu tiếp cận đề tài.
+
+Việc tương tác với AI giúp nhóm học hỏi thêm các kỹ năng về lập trình và xử lý dữ liệu, đồng thời giúp bài báo cáo được trình bày một cách rõ ràng và khoa học hơn.
+
+\newpage
+
+\section{Tóm tắt vai trò của AI trong dự án}
+Dưới đây là bảng tổng hợp các giai đoạn mà nhóm đã tham khảo và nhận sự hỗ trợ từ AI:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\textbf{Bước} & \textbf{Giai đoạn} & \textbf{Nội dung tham vấn AI} \\ \hline
+1 & Khởi tạo & Gợi ý hướng đi cho đề tài và các bước nghiên cứu cơ bản. \\ \hline
+2 & Thiết kế dữ liệu & Tham khảo về các thuộc tính cần thiết trong dữ liệu bất động sản. \\ \hline
+3 & Thu thập & Hỗ trợ viết code tham khảo và xử lý lỗi phát sinh khi cào dữ liệu. \\ \hline
+4 & Xử lý & Tham khảo các câu lệnh SQL để làm sạch và chuẩn hóa dữ liệu. \\ \hline
+5 & Hoàn thiện & Hỗ trợ định dạng văn bản bằng LaTeX và vẽ sơ đồ quy trình. \\ \hline
+\end{tabularx}
+\end{table}
+
+\newpage
+
+\section{Chi tiết nội dung tương tác AI}
+
+\subsection{Giai đoạn 1: Tham vấn định hướng đề tài}
+Nhóm sử dụng AI để tìm kiếm ý tưởng triển khai dự án và tham khảo các bước thực hiện nghiên cứu cơ bản.
+\begin{itemize}[label=$\bullet$]
+    \item \textbf{Nội dung:} Trao đổi về cách đặt vấn đề cho đề tài bất động sản và lộ trình thực hiện tổng quát.
+    \item \textbf{Lưu trữ hội thoại:} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2216fV2CYTTRMIDJKNbg_ydAXpNiobBe0MH%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Hội thoại thảo luận chọn đề tài} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221BtG7_MjMMbGiqNV00Tu6_paHklaXeqQB%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Tham khảo các bước nghiên cứu}
+\end{itemize}
+
+\subsection{Giai đoạn 2: Tham khảo lựa chọn đặc trưng dữ liệu}
+Nhóm nhờ AI gợi ý các trường thông tin cần thiết cần có trong bộ dữ liệu để phục vụ việc phân tích.
+\begin{itemize}[label=$\bullet$]
+    \item \textbf{Nội dung:} Tham khảo các yếu tố ảnh hưởng đến giá trị bất động sản như vị trí, tiện ích và các đặc điểm hạ tầng.
+    \item \textbf{Lưu trữ hội thoại:} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221zWIU1WWr-gP229cYPvjBAAo7PbS95-xr%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Tư vấn lựa chọn các trường dữ liệu}
+\end{itemize}
+
+\subsection{Giai đoạn 3: Hỗ trợ viết code thu thập dữ liệu}
+Trong giai đoạn này, AI hỗ trợ nhóm viết các đoạn mã Python để cào dữ liệu từ trang web và lấy thông tin từ bản đồ.
+\begin{itemize}[label=$\bullet$]
+    \item \textbf{Nội dung:} Hỗ trợ khung mã nguồn xử lý các yêu cầu thu thập dữ liệu và xử lý lỗi kết nối.
+    \item \textbf{Lưu trữ hội thoại:} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2216BqF-fDeiIPEwmq-7ePB756SjpTPirkS%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Tham khảo code cào dữ liệu Web} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%2215sAC-6bKQH-_11Gqrhokz4fbKDKcm8h5%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Tham khảo code lấy dữ liệu bản đồ}
+\end{itemize}
+
+\subsection{Giai đoạn 4: Tham khảo SQL để làm sạch dữ liệu}
+AI hỗ trợ nhóm viết các câu lệnh SQL cơ bản để xử lý dữ liệu sau khi thu thập.
+\begin{itemize}[label=$\bullet$]
+    \item \textbf{Nội dung:} Tham khảo các truy vấn để loại bỏ dòng trùng lặp, xử lý các giá trị bị thiếu và chuẩn hóa lại dữ liệu.
+    \item \textbf{Lưu trữ hội thoại:} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221yccOtbr6XtvkGxnmKHPzHSk1v5jOR9xD%22%5D,%22action%22:%22open%22,%22userId%22:%22103260168952391043836%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Câu lệnh SQL làm sạch dữ liệu}
+\end{itemize}
+
+\subsection{Giai đoạn 5: Trình bày báo cáo và Sơ đồ}
+Giai đoạn cuối cùng nhóm sử dụng AI để hỗ trợ trong việc soạn thảo nội dung theo định dạng LaTeX và trình bày sơ đồ làm việc.
+\begin{itemize}[label=$\bullet$]
+    \item \textbf{Nội dung:} Hỗ trợ các câu lệnh định dạng LaTeX và gợi ý cấu trúc sơ đồ quy trình làm việc.
+    \item \textbf{Lưu trữ hội thoại:} \\
+    \href{https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221VD6uj9sjw3nl71zDewpKb12Vfk984vn7%22%5D,%22action%22:%22open%22,%22userId%22:%22108088689730778455563%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing}{Hỗ trợ soạn thảo LaTeX} \\
+    \href{https://chatgpt.com/share/697ffeb9-d8e8-8008-b4d2-430302dd26e0}{Gợi ý sơ đồ quy trình làm việc}
+\end{itemize}
+
+\section{Tổng kết}
+Việc nhận được sự hỗ trợ từ các công cụ AI đã giúp nhóm nghiên cứu giải quyết các vướng mắc về mặt kỹ thuật một cách hiệu quả hơn. Đây là nguồn tham khảo hữu ích giúp nhóm hoàn thiện dự án đúng tiến độ và đảm bảo các yêu cầu cơ bản của môn học.
+
+\end{document}

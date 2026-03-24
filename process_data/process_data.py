@@ -90,6 +90,9 @@ final_gdf = pd.concat(cleaned_gdfs, ignore_index=True)
 # Xóa cột 'geometry' vì file CSV không cần cột tọa độ không gian này
 final_df = final_gdf.drop(columns=['geometry'])
 
+final_df["price_billion"] = final_df["price_total"] / 1000000000
+final_df = final_df[final_df['area'].between(15, 1000) & final_df['price_billion'].between(0.5, 60)]
+
 # XUẤT FILE 1: cleaned_data.csv (Đầy đủ tất cả các cột)
 # Dùng utf-8-sig để file CSV không bị lỗi font tiếng Việt khi mở bằng Excel
 final_df.to_csv("../data/cleaned_data.csv", index=False, encoding="utf-8-sig")
@@ -114,7 +117,8 @@ columns_for_training =[
 	'num_floors',
 	'num_schools_1km', 
 	'num_hospitals_2km',
-	'num_markets_1km'
+	'num_markets_1km',
+	'price_billion'
 ]
 
 # Kiểm tra xem các cột bạn cần có tồn tại trong DataFrame không để tránh lỗi
