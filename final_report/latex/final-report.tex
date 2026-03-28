@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage[T1]{fontenc}
+\usepackage[T5]{fontenc}
 \usepackage{mathptmx}
 % Margin optimization to save space
 \usepackage[top=1.8cm, bottom=1.8cm, left=2cm, right=2cm]{geometry} 
@@ -171,9 +171,47 @@ Raw data collected from online environments often contains a lot of noise, incon
 The processing procedure focuses on resolving formatting and consistency issues:
 \begin{itemize}[noitemsep, topsep=0pt]
     \item \textbf{Format Standardization:} Quantitative attributes (price, area) were extracted and converted from text format to numerical format.
-    \item \textbf{Data Synchronization:} Standardized administrative location information (District/County) into a unified standard category, removing incorrect name variations.
+\vspace{-0.3em}
+\begin{scriptsize}
+\begin{verbatim}
+# Python: Extract float value from string
+def clean_number(text):
+    num = re.findall(r"[-+]?\d*\.\d+|\d+", str(text).replace(',', '.'))
+    return float(num[0]) if num else 0.0
+\end{verbatim}
+\end{scriptsize}
+
+    \item \textbf{Data Synchronization:} Standardized administrative location information (District/County) into a unified standard category.
+\vspace{-0.3em}
+\begin{scriptsize}
+\begin{verbatim}
+-- SQL: Unifying variant strings
+update raw_data set district = case
+    when district like N'%Bình Thạnh%' then N'Quận Bình Thạnh'
+    when district like N'%Thủ Đức%' then N'Thành phố Thủ Đức'
+    when district is null then N'Chưa xác định' else district end;
+\end{verbatim}
+\end{scriptsize}
+
     \item \textbf{Deduplication:} Identified and removed duplicate listings to ensure data uniqueness.
+\vspace{-0.3em}
+\begin{scriptsize}
+\begin{verbatim}
+-- SQL: Distinct filtering
+select distinct * into temp from raw_data;
+delete from raw_data;
+insert into raw_data select * from temp;
+\end{verbatim}
+\end{scriptsize}
+
     \item \textbf{Data Range Filtering:} Removed outliers, keeping only properties priced from \textbf{500 million to 60 billion VND}, with an area ranging from \textbf{15m$^2$ to 1000m$^2$}.
+\vspace{-0.3em}
+\begin{scriptsize}
+\begin{verbatim}
+# Python: Pandas bounding
+df = df[df['area'].between(15, 1000) & df['price_billion'].between(0.5, 60)]
+\end{verbatim}
+\end{scriptsize}
 \end{itemize}
 
 \subsection{Missing Data Handling and Feature Selection}
@@ -266,28 +304,28 @@ The indices on the matrix show that total price (\texttt{price\_total}) has a di
 The team built an automated \texttt{Pipeline}: Imputing missing values, encoding categorical variables (One-Hot Encoder), and scaling quantitative variables (StandardScaler). The data was divided into Training and Testing sets at an \textbf{80:20} ratio.
 
 \subsection{Regression Analysis}
-Before building complex forecasting models, the team used \textbf{Ridge Regression} to evaluate the linear impact of each feature on house prices (Figure \ref{fig:ridge_coefficients}). The results showed:
+Before building complex forecasting models, the team used \textbf{Linear Regression} to evaluate the linear impact of each feature on house prices (Figure \ref{fig:ridge_coefficients}). The results showed:
 
 \begin{itemize}[noitemsep, topsep=0pt]
     \item \textbf{Confirming patterns:} District variables (\texttt{district}) completely dominated the weight rankings. Central districts (Tay Ho, Ba Dinh, District 1) carry very large positive coefficients (strongly increasing prices), while suburban districts (Ba Vi, Cu Chi) carry large negative coefficients (decreasing prices).
     \item \textbf{Property Type:} The variable \texttt{category\_Villas, Townhouses} is the only non-location factor to reach the top, showing that this premium property type adds immense value to an asset.
-    \item \textbf{Limitations of linear models:} Although Ridge explains market trends well, the overall accuracy ($R^2$) only reached \textbf{0.57}. The interaction between location, amenities, and area in reality is non-linear, requiring more powerful machine learning algorithms for accurate forecasting.
+    \item \textbf{Limitations of linear models:} Although Linear Regression explains market trends well, the overall accuracy ($R^2$) only reached \textbf{0.57}. The interaction between location, amenities, and area in reality is non-linear, requiring more powerful machine learning algorithms for accurate forecasting.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{ridge_coefficients.png}
+    \includegraphics[width=0.7\textwidth]{linear_regression_coefficients.png}
     \caption{Top 10 Factors with the Largest Regression Weights Impacting House Prices}
     \label{fig:ridge_coefficients}
 \end{figure}
 
 \subsection{Machine Learning Model Evaluation and Selection}
-The team empirically trained 15 different Machine Learning algorithms (Ensemble, Tree-based, Boosting, etc.).
+The team empirically trained 5 different Machine Learning algorithms (Ensemble, Tree-based, Boosting, etc.).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{bang_ket_qua_model.png}
-    \caption{Performance Ranking of 15 Machine Learning Models}
+    \caption{Performance Ranking of 5 Machine Learning Models}
     \label{fig:bang_ket_qua_model}
 \end{figure}
 

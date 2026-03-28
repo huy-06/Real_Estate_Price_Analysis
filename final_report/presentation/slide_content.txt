@@ -79,13 +79,13 @@ SLIDE 6: EXPLORATORY DATA ANALYSIS (EDA) & STATISTICS
 SLIDE 7: MODELLING / REGRESSION ANALYSIS
 [Visual/Text on Slide]
 - Preprocessing Pipeline: Missing value imputation, One-Hot Encoding, StandardScaler (80:20 Train/Test split).
-- Initial Linear Analysis (Ridge Regression):
+- Initial Linear Analysis (Linear Regression):
   - Confirmed distinct market trends (Central districts and Villas have huge positive weights).
   - Accuracy limitation: R-squared only reached 0.57 due to complex non-linear relationships.
-- ML Experimentation: Evaluated 15 different Machine Learning algorithms to capture non-linear market patterns.
+- ML Experimentation: Evaluated 5 different Machine Learning algorithms to capture non-linear market patterns.
 
 [Presenter Notes / What to say]
-"For modelling, we set up a robust preprocessing pipeline using an 80:20 train-test split. We started with a baseline Ridge Regression model. It correctly identified that central districts and property types like Villas carry huge price premiums. However, properties have highly non-linear relationships with their environment, so the linear model's R-squared stalled at 0.57. Because of this, we experimented with 15 different, more advanced machine learning models to find the perfect fit."
+"For modelling, we set up a robust preprocessing pipeline using an 80:20 train-test split. We started with a baseline Linear Regression model. It correctly identified that central districts and property types like Villas carry huge price premiums. However, properties have highly non-linear relationships with their environment, so the linear model's R-squared stalled at 0.57. Because of this, we experimented with 5 different, more advanced machine learning models to find the perfect fit."
 
 --------------------------------------------------
 
@@ -98,7 +98,7 @@ SLIDE 8: KEY RESULTS & VISUALIZATIONS
   - Users click a location on a Folium map -> API fetches live amenity data -> Extra Trees model instantly predicts the price.
 
 [Presenter Notes / What to say]
-"Among the 15 models tested, the 'Extra Trees' algorithm emerged as the clear winner, achieving an impressive R-squared score of 0.84 with the lowest error margin. To bring this research to life, we packaged our model into a Streamlit Web Application. As you can see on the screen, users can simply click a point on an interactive map. In the background, it calls an API to count nearby amenities, feeds this into our Extra Trees model, and instantly returns a predicted property price."
+"Among the 5 models tested, the 'Extra Trees' algorithm emerged as the clear winner, achieving an impressive R-squared score of 0.84 with the lowest error margin. To bring this research to life, we packaged our model into a Streamlit Web Application. As you can see on the screen, users can simply click a point on an interactive map. In the background, it calls an API to count nearby amenities, feeds this into our Extra Trees model, and instantly returns a predicted property price."
 
 --------------------------------------------------
 
